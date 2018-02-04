@@ -31,6 +31,7 @@ Route::group(array('prefix' => 'quran/v1', 'before' => 'auth.basic'), function()
 	Route::get('mutashab', 'MutashabController@index');
 	Route::get('mutashab/{valeur}', 'MutashabController@mutashab');
 	Route::get('mutashab/search/{valeur}', 'MutashabController@search');
+	Route::get('update/', 'MutashabController@update');
 });
 
 

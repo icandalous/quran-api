@@ -48,13 +48,34 @@ class MutashabController extends Controller
   
   public function search($str){
 	  $result= array();
+	  $ids = array();
 	  
 	   $ayats = $this->searchAyat($str);
 	   foreach($ayats as $index => $ayahInfo ){
-		   if($ayahInfo['mutashab-id'] != -1){
+		   if($ayahInfo['mutashab-id'] != -1 && !in_array($ayahInfo['mutashab-id'], $ids)){
+			   array_push($ids, $ayahInfo['mutashab-id']);
 			   $mutashabs = $this->getData();
 			   if(isset($mutashabs[$ayahInfo['mutashab-id']-1])){
-				   array_push($result, $mutashabs[$ayahInfo['mutashab-id']-1]);
+				   $mutashab = $mutashabs[$ayahInfo['mutashab-id']-1];
+				   //array_push($ids, $index);
+				   foreach($mutashab['data'] as &$item){
+					   //var_dump($item);
+						$quran_data = $this->getAllAyat();
+						foreach($quran_data as $pos =>$line){
+							if($line['chapter_number'] == $item['sourate_num'] && $line['Ayah_number'] == $item['ayat_num']){
+								$item["ayahid"]= $line['ayahid'];
+								$item["page-tag"]= $line['page-tag'];
+								$item["pageid"]= $line['pageid'];
+								$item["rubuhizbid"]= $line['rubuhizbid'];
+								$item["hizbid"]= $line['hizbid'];
+								$item["juzid"]= $line['juzid'];
+								$item["sura name"] = $line["sura name"];
+								$item["content_ar"] = $line["content_ar"];
+							}
+						}
+						
+					}
+				   array_push($result, $mutashab);
 				   
 			   }
 			  
@@ -96,5 +117,30 @@ class MutashabController extends Controller
 	
 	return $string;
 
+  }
+  
+  public function update(){
+	$quran_data = $this->getAllAyat();
+	$mutashab = $this->getData();
+	
+	foreach($mutashab as $i => $data ){
+		$index = $data["index"];
+		var_dump($index);
+		foreach($data as $k => $item){
+			//var_dump($item);
+			$quran_data[$index-1]['mutashab-id'] = $item["indice"];
+		}
+		    
+	}
+	
+	//Convert updated array to JSON
+	   $jsondata = json_encode($quran_data, JSON_PRETTY_PRINT);
+	   
+	   //write json data into data.json file
+	   if(file_put_contents(base_path('datajson/quran_details_new.json'), $jsondata)) {
+	        echo 'Data successfully saved';
+	   }
+	   else 
+	        echo "error";
   }
 }
